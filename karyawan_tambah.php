@@ -44,6 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <title>Tambah Karyawan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
 <div class="d-flex">
@@ -92,20 +93,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="file" name="foto" class="form-control" accept="image/*" required>
             </div>
             <div class="mb-3">
-                <label class="form-label">Rating (1 - 5)</label>
-                <select name="nilai_rating" class="form-select" required>
-                    <option value="">-- Pilih Rating --</option>
-                    <option value="1">1 - Sangat Buruk</option>
-                    <option value="2">2 - Buruk</option>
-                    <option value="3">3 - Cukup</option>
-                    <option value="4">4 - Baik</option>
-                    <option value="5">5 - Sangat Baik</option>
-                </select>
+                <label class="form-label">Rating Karyawan</label>
+                <div class="rating-stars d-flex gap-1 fs-4 text-warning" style="cursor:pointer;">
+                    <?php
+                    for ($i = 1; $i <= 5; $i++) {
+                        echo '<i class="bi bi-star" data-rating="' . $i . '" title="Rating ' . $i . '"></i>';
+                    }
+                    ?>
+                </div>
+                <input type="hidden" name="nilai_rating" id="rating-value" required>
             </div>
+
             <button type="submit" class="btn btn-success">Simpan</button>
             <a href="karyawan.php" class="btn btn-secondary">Kembali</a>
         </form>
     </div>
 </div>
+
+    <script>
+        document.querySelectorAll('.rating-stars i').forEach(star => {
+            star.addEventListener('click', () => {
+                const rating = star.getAttribute('data-rating');
+                document.getElementById('rating-value').value = rating;
+
+                // Update tampilan bintang
+                document.querySelectorAll('.rating-stars i').forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.remove('bi-star');
+                        s.classList.add('bi-star-fill');
+                    } else {
+                        s.classList.remove('bi-star-fill');
+                        s.classList.add('bi-star');
+                    }
+                });
+            });
+        });
+        </script>
+
+
 </body>
 </html>

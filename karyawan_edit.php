@@ -177,15 +177,15 @@ $jabatan_query = mysqli_query($conn, "SELECT * FROM jabatan");
                             <?php endif; ?>
                         </div>
                         
-                        <div class="rating-container">
+                        <div class="rating-container mb-3">
                             <label class="form-label">Rating Kinerja (Bulan Ini)</label>
                             <input type="hidden" name="rating" id="rating-value" value="<?php echo $nilai_rating; ?>">
-                            <div class="rating-stars">
+                            <div class="rating-stars d-flex gap-1 fs-4 text-warning" style="cursor: pointer;">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <i class="bi bi-star<?= ($i <= $nilai_rating) ? '-fill' : '' ?>" 
-                                       data-rating="<?php echo $i; ?>"></i>
+                                    <i class="bi <?= ($i <= $nilai_rating) ? 'bi-star-fill' : 'bi-star' ?>" data-rating="<?= $i ?>"></i>
                                 <?php endfor; ?>
                             </div>
+                        </div>
                             <small class="text-muted">Klik bintang untuk memberikan rating (1-5)</small>
                         </div>
                     </div>
@@ -204,27 +204,25 @@ $jabatan_query = mysqli_query($conn, "SELECT * FROM jabatan");
     </div>
 </div>
 
-<script>
-// Fungsi untuk rating bintang
-document.querySelectorAll('.rating-stars i').forEach(star => {
-    star.addEventListener('click', () => {
-        const rating = star.getAttribute('data-rating');
-        document.getElementById('rating-value').value = rating;
-        
-        // Update tampilan bintang
-        document.querySelectorAll('.rating-stars i').forEach((s, index) => {
-            if (index < rating) {
-                s.classList.remove('bi-star');
-                s.classList.add('bi-star-fill');
-            } else {
-                s.classList.remove('bi-star-fill');
-                s.classList.add('bi-star');
-            }
-        });
-    });
-});
-</script>
+        <script>
+            document.querySelectorAll('.rating-stars i').forEach(star => {
+                star.addEventListener('click', () => {
+                    const rating = star.getAttribute('data-rating');
+                    document.getElementById('rating-value').value = rating;
 
-<?php include 'includes/footer.php'; ?>
+                    // Update tampilan bintang
+                    document.querySelectorAll('.rating-stars i').forEach((s, index) => {
+                        if (index < rating) {
+                            s.classList.remove('bi-star');
+                            s.classList.add('bi-star-fill');
+                        } else {
+                            s.classList.remove('bi-star-fill');
+                            s.classList.add('bi-star');
+                        }
+                    });
+                });
+            });
+        </script>
+
 </body>
 </html>

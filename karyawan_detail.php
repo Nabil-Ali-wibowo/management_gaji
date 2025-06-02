@@ -1,5 +1,6 @@
 <?php
 include 'koneksi.php';
+include 'includes/sidebar.php';
 
 // Validasi ID
 if(!isset($_GET['id'])) {
@@ -84,7 +85,7 @@ $avg_rating = $avg_rating_query->get_result()->fetch_assoc()['rata_rata'];
 <body>
 <?php include 'includes/header.php'; ?>
 
-<div class="container profile-container">
+<div class="container mt-4" style="width: 1000px; margin-left: 23rem;">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
             <h4><i class="bi bi-person-badge"></i> Detail Karyawan</h4>
@@ -147,9 +148,6 @@ $avg_rating = $avg_rating_query->get_result()->fetch_assoc()['rata_rata'];
                         <a href="karyawan_edit.php?id=<?= $id ?>" class="btn btn-warning ms-2">
                             <i class="bi bi-pencil"></i> Edit Data
                         </a>
-                        <a href="karyawan_rating.php?id=<?= $id ?>" class="btn btn-success ms-2">
-                            <i class="bi bi-star"></i> Beri Rating
-                        </a>
                     </div>
                 </div>
             </div>
@@ -191,6 +189,6 @@ $avg_rating = $avg_rating_query->get_result()->fetch_assoc()['rata_rata'];
         </div>
     </div>
 </div>
-
+<?php include 'includes/footer.php'; ?>
 </body>
 </html>

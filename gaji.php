@@ -22,7 +22,7 @@ include 'koneksi.php';
     <?php include 'includes/sidebar.php'; ?>
     <div class="p-4 w-100">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="text-success"><i class="bi bi-cash-stack me-2"></i>Daftar Tarif Lembur</h3>
+            <h3 class="text-success"><i class="bi bi-cash-stack me-2"></i>Daftar Gaji</h3>
             <a href="gaji_tambah.php" class="btn btn-primary btn-icon">
                 <i class="bi bi-plus-circle-fill"></i> Tambah Gaji
             </a>

@@ -1,93 +1,73 @@
 <?php
 include 'koneksi.php';
 
-// Validasi ID
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    header("Location: lembur_list.php?error=ID tidak valid");
-    exit();
+// Ambil data rating berdasarkan ID
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $query = mysqli_query($conn, "SELECT * FROM rating WHERE id = '$id'");
+    $data = mysqli_fetch_assoc($query);
+
+    if (!$data) {
+        echo "Data rating tidak ditemukan.";
+        exit;
+    }
 }
 
-$id = intval($_GET['id']);
+// Ambil semua karyawan untuk dropdown
+$karyawanList = mysqli_query($conn, "SELECT id, nama FROM karyawan");
 
-try {
-    // Gunakan prepared statement untuk mencegah SQL injection
-    $stmt = $conn->prepare("SELECT * FROM tarif_lembur WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows == 0) {
-        header("Location: lembur_list.php?error=Data tarif lembur tidak ditemukan");
-        exit();
-    }
+// Proses update data jika form disubmit
+if (isset($_POST['submit'])) {
+    $karyawan_id = $_POST['karyawan_id'];
+    $bulan = $_POST['bulan'];
+    $nilai_rating = $_POST['nilai_rating'];
 
-    $data = $result->fetch_assoc();
-} catch (Exception $e) {
-    // Jika tabel tidak ada, tampilkan pesan error yang lebih jelas
-    if (strpos($e->getMessage(), "doesn't exist") !== false) {
-        die("Error: Tabel tarif_lembur belum dibuat. Silakan buat tabel terlebih dahulu.");
+    $update = mysqli_query($conn, "UPDATE rating SET 
+        karyawan_id = '$karyawan_id',
+        bulan = '$bulan', 
+        nilai_rating = '$nilai_rating' 
+        WHERE id = '$id'");
+
+    if ($update) {
+        echo "<script>alert('Data rating berhasil diperbarui!'); window.location='rating.php';</script>";
+    } else {
+        echo "Gagal memperbarui data: " . mysqli_error($conn);
     }
-    die("Error: " . $e->getMessage());
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Tarif Lembur</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-    </style>
+    <title>Edit Rating</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h2 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Tarif Lembur</h2>
+<div class="container mt-5">
+    <h2>Edit Data Rating</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label>Nama Karyawan</label>
+            <select name="karyawan_id" class="form-control" required>
+                <option value="">-- Pilih Karyawan --</option>
+                <?php while ($karyawan = mysqli_fetch_assoc($karyawanList)) { ?>
+                    <option value="<?= $karyawan['id']; ?>" <?= ($karyawan['id'] == $data['karyawan_id']) ? 'selected' : ''; ?>>
+                        <?= $karyawan['nama']; ?>
+                    </option>
+                <?php } ?>
+            </select>
         </div>
-        <div class="card-body">
-            <form action="lembur_update.php" method="POST">
-                <input type="hidden" name="id" value="<?= htmlspecialchars($data['id']) ?>">
-                
-                <div class="form-group">
-                    <label for="nama_tarif" class="form-label">Nama Tarif</label>
-                    <input type="text" class="form-control" id="nama_tarif" name="nama_tarif" 
-                           value="<?= htmlspecialchars($data['nama_tarif']) ?>" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="tarif_per_jam" class="form-label">Tarif Per Jam</label>
-                    <div class="input-group">
-                        <span class="input-group-text">Rp</span>
-                        <input type="number" class="form-control" id="tarif_per_jam" name="tarif_per_jam" 
-                               value="<?= htmlspecialchars($data['tarif_per_jam']) ?>" min="0" step="1000" required>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="lembur_list.php" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Kembali
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Simpan Perubahan
-                    </button>
-                </div>
-            </form>
+        <div class="form-group">
+            <label>Bulan</label>
+            <input type="text" name="bulan" class="form-control" value="<?= $data['bulan'] ?>" placeholder="Contoh: 2025-06" required>
         </div>
-    </div>
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <div class="form-group">
+            <label>Nilai Rating</label>
+            <input type="number" name="nilai_rating" class="form-control" value="<?= $data['nilai_rating'] ?>" required>
+        </div>
+        <button type="submit" name="submit" class="btn btn-primary">Simpan Perubahan</button>
+        <a href="rating.php" class="btn btn-secondary">Batal</a>
+    </form>
+</div>
 </body>
 </html>
