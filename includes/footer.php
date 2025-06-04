@@ -52,7 +52,7 @@
           </a>
 
           <!-- Instagram -->
-          <a class="btn btn-primary btn-floating m-1" style="background-color: #ac2bac;" href="https://www.instagram.com/mf_rdwnzc/"  target="_blank" role="button">
+          <a class="btn btn-primary btn-floating m-1" style="background-color: #ac2bac;" href="https://www.instagram.com/galyen_sky/"  target="_blank" role="button">
             <i class="fab fa-instagram"></i>
           </a>
 

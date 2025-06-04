@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $alamat = $_POST['alamat'];
     $no_hp = $_POST['no_hp'];
     $jabatan_id = $_POST['jabatan_id'];
-    $rating = $_POST['rating'] ?? null; // Nilai rating dari form
+    $nilai_rating = $_POST['nilai_rating']; // Nilai rating dari form
 
     // Handle file upload
     $foto = $_POST['foto_lama'];
@@ -25,48 +25,49 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $conn->begin_transaction();
 
     try {
-        // Update data karyawan
-        $stmt = $conn->prepare("UPDATE karyawan SET 
-                              nama = ?, 
-                              umur = ?, 
-                              jenis_kelamin = ?, 
-                              alamat = ?, 
-                              no_hp = ?, 
-                              foto = ?, 
-                              jabatan_id = ? 
-                              WHERE id = ?");
-        $stmt->bind_param("sissssii", $nama, $umur, $jenis_kelamin, $alamat, $no_hp, $foto, $jabatan_id, $id);
-        $stmt->execute();
-        
-        // Jika ada rating, simpan/update rating
-        if ($rating !== null) {
-            $bulan_ini = date('Y-m-01');
-            $cek_rating = $conn->prepare("SELECT id FROM rating WHERE karyawan_id = ? AND bulan = ?");
-            $cek_rating->bind_param("is", $id, $bulan_ini);
-            $cek_rating->execute();
-            $hasil_cek = $cek_rating->get_result();
-            
-            if ($hasil_cek->num_rows > 0) {
-                // Update rating yang sudah ada
-                $row = $hasil_cek->fetch_assoc();
-                $update_rating = $conn->prepare("UPDATE rating SET nilai_rating = ? WHERE id = ?");
-                $update_rating->bind_param("ii", $rating, $row['id']);
-                $update_rating->execute();
-            } else {
-                // Insert rating baru
-                $insert_rating = $conn->prepare("INSERT INTO rating (karyawan_id, bulan, nilai_rating) VALUES (?, ?, ?)");
-                $insert_rating->bind_param("isi", $id, $bulan_ini, $rating);
-                $insert_rating->execute();
-            }
+    // Update data karyawan tanpa kolom nilai_rating karena rating akan ditangani terpisah
+    $query = $conn->prepare("UPDATE karyawan SET 
+        nama = ?, umur = ?, jenis_kelamin = ?, jabatan_id = ?, alamat = ?, no_hp = ?, foto = ?
+        WHERE id = ?");
+    $query->bind_param("sisisssi", $nama, $umur, $jenis_kelamin, $jabatan_id, $alamat, $no_hp, $foto, $id);
+    $query->execute();
+
+    // Jika ada rating, simpan/update rating
+    if ($rating !== null) {
+        $bulan_ini = date('Y-m-01');
+
+        // Cek apakah rating sudah ada
+        $cek_rating = $conn->prepare("SELECT id FROM rating WHERE karyawan_id = ? AND bulan = ?");
+        $cek_rating->bind_param("is", $id, $bulan_ini);
+        $cek_rating->execute();
+        $hasil_cek = $cek_rating->get_result();
+
+        if ($hasil_cek->num_rows > 0) {
+            // Update rating
+            $row = $hasil_cek->fetch_assoc();
+            $update_rating = $conn->prepare("UPDATE rating SET nilai_rating = ? WHERE id = ?");
+            $update_rating->bind_param("ii", $rating, $row['id']);
+            $update_rating->execute();
+        } else {
+            // Insert rating baru
+            $insert_rating = $conn->prepare("INSERT INTO rating (karyawan_id, bulan, nilai_rating) VALUES (?, ?, ?)");
+            $insert_rating->bind_param("isi", $id, $bulan_ini, $rating);
+            $insert_rating->execute();
         }
-        
-        $conn->commit();
-        header("Location: karyawan.php?success=Data karyawan dan rating berhasil diupdate");
-    } catch (Exception $e) {
-        $conn->rollback();
-        header("Location: karyawan.php?error=Gagal update data: " . $e->getMessage());
+
+        // JANGAN LUPA: update juga kolom nilai_rating di tabel karyawan (jika ingin ditampilkan langsung di halaman awal)
+        $update_karyawan_rating = $conn->prepare("UPDATE karyawan SET nilai_rating = ? WHERE id = ?");
+        $update_karyawan_rating->bind_param("ii", $rating, $id);
+        $update_karyawan_rating->execute();
     }
-    exit;
+
+    $conn->commit();
+    header("Location: karyawan.php?success=Data karyawan dan rating berhasil diupdate");
+} catch (Exception $e) {
+    $conn->rollback();
+    header("Location: karyawan.php?error=Gagal update data: " . $e->getMessage());
+}
+exit;
 }
 
 // Ambil data karyawan untuk diedit
